@@ -1,11 +1,41 @@
+import { MENU_ITEMS } from "@/constants";
 import {useEffect ,useLayoutEffect,useRef} from "react";
 import { useSelector , useDispatch } from "react-redux";
+import { menuItemClick, actionItemClick } from '@/slice/menuSlice'
 
 const Board = () => {
+    const dispatch = useDispatch();
     const canvasRef = useRef(null);
     const shouldDraw = useRef(false);
-    const activeMenuItem = useSelector((state)=> state.menu.activeMenuItem);
+    const {activeMenuItem,actionMenuItem} = useSelector((state)=> state.menu);
     const {color,size} = useSelector((state)=> state.toolbox[activeMenuItem])
+
+    useEffect(()=>{
+        if(!canvasRef.current)   return;
+        
+        const canvas = canvasRef.current;
+        const context = canvas.getContext('2d');
+
+        if(actionMenuItem === MENU_ITEMS.DOWNLOAD){
+            context.globalCompositeOperation = 'destination-over';
+            context.fillStyle = 'white';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+
+            const URL = canvas.toDataURL();
+            const anchor = document.createElement('a');
+            anchor.href = URL;
+            anchor.download = 'sketch.jpg'
+            anchor.click();
+            console.log(URL);
+            context.globalCompositeOperation = 'source-over';
+        }
+        dispatch(actionItemClick(null));
+        
+        console.log('actionMenuItem',actionMenuItem)
+    },[actionMenuItem,dispatch])
+
+
+
 
     useEffect(()=>{
         if(!canvasRef.current)   return;
@@ -32,6 +62,9 @@ const Board = () => {
         const context = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight; 
+
+        context.fillStyle = "white";
+        context.fillRect(0, 0, canvas.width, canvas.height);
 
         const beginPath = (x,y) =>{
             context.beginPath();
