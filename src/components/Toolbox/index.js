@@ -1,22 +1,33 @@
 import { useSelector,useDispatch } from 'react-redux';
 import styles from './index.module.css';
+import { useEffect } from 'react';
 import cx from "classnames";
 import { COLORS, MENU_ITEMS } from '@/constants';
 import { changeColor,changeBrushSize } from '@/slice/toolboxSlice';
+import {socket} from "@/socket"
 const Toolbox = () => {
 
 const dispatch = useDispatch();
     const activeMenuItem = useSelector((state)=> state.menu.activeMenuItem )
     const updateBrushSize = (e) =>{
         dispatch(changeBrushSize({item:activeMenuItem , size: e.target.value }))
+        socket.emit('changeConfig',{color,size:e.target.value})
     } 
     const updateColor = (newColor) =>{
         dispatch(changeColor({item:activeMenuItem , color: newColor }))
-    } 
-    const {color,size} = useSelector((state)=> state.toolbox[activeMenuItem])
-const showStrokeToolOption = activeMenuItem === MENU_ITEMS.PENCIL;
-const showBrushToolOption = activeMenuItem === MENU_ITEMS.PENCIL || MENU_ITEMS.ERASER;
+        socket.emit('changeConfig',{color:newColor,size})
 
+    } 
+
+    
+    const {color,size} = useSelector((state)=> state.toolbox[activeMenuItem])
+    const showStrokeToolOption = activeMenuItem === MENU_ITEMS.PENCIL;
+    const showBrushToolOption = activeMenuItem === MENU_ITEMS.PENCIL || MENU_ITEMS.ERASER;
+    useEffect(() => {
+        if (activeMenuItem === MENU_ITEMS.ERASER) {
+            socket.emit('changeConfig', { color: 'white', size });
+        }
+    }, [activeMenuItem, size]);
     return(
         <div className={styles.toolboxContainer}>
         {showStrokeToolOption &&   <div className={styles.toolItem}>
