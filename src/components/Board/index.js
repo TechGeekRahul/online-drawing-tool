@@ -2,7 +2,7 @@ import { MENU_ITEMS } from "@/constants";
 import {useEffect ,useLayoutEffect,useRef} from "react";
 import { useSelector , useDispatch } from "react-redux";
 import { menuItemClick, actionItemClick } from '@/slice/menuSlice'
-
+import {socket} from "@/socket"
 const Board = () => {
     const dispatch = useDispatch();
     const canvasRef = useRef(null);
@@ -105,6 +105,10 @@ const Board = () => {
         canvas.addEventListener('mousemove',handleMouseMove);
         canvas.addEventListener('mouseup',handleMouseUp);
         
+
+        socket.on("connect",()=>{
+            console.log("client connected");
+        })
         return () => {
         canvas.removeEventListener('mousedown',handleMouseDown);
         canvas.removeEventListener('mousemove',handleMouseMove);
